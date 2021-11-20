@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block main %}
+  <div class="pt-4 container-md">
+    <h1 class="pb-4 text-center">ChatServer</h1>
+    
+    <div class="col col-md-6 offset-md-3">
+      <p>What chat group would you like to enter?</p>
+      <div class="input-group">
+        <input class="form-control" id="group-name-input" type="text" />
+        <button id="group-name-submit" class="px-4 btn btn-primary">Send</button>
+      </div>
+    </div>
+  </div>
+  {% endblock %}
+
+{% block script %}
+  <script>
+    document.querySelector("#group-name-input").focus();
+    document.querySelector("#group-name-input").onkeyup = function (e) {
+      if (e.keyCode === 13) {
+        document.querySelector("#group-name-submit").click();
+      }
+    };
+
+    document.querySelector("#group-name-submit").onclick = function (e) {
+      var groupName = String(document.querySelector("#group-name-input").value).toUpperCase();
+      window.location.pathname = groupName + "/";
+    };
+  </script>
+{% endblock %}

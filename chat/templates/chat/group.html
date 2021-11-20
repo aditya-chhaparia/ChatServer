@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block main %}
+  <div class="p-0 flex-column vh-100 container-fluid d-flex" style="padding-top:90px!important;">
+    <div class="flex-column d-flex fixed-top" style="height:100px">
+      <h1 class="p-0 px-2 m-0" style="height:60px;line-height:70px">ChatServer</h1>
+      <h4 class='p-0 px-2 m-0 fw-light' style="height:30px; line-height:30px">Group Name: {{ group_name | upper }}</h4>
+    </div>
+    <textarea id="chat-log" rows="10" class="form-control flex-grow-1" disabled style="resize: none;"></textarea>
+    <div class="input-group fixed-bottom">
+      <input class="form-control" id="chat-message-input" type="text" style="border-radius: 0;"/>
+      <button id="chat-message-submit" class="btn btn-primary" style="border-radius: 0;">Send</button>
+    </div>
+    {{ group_name|json_script:"group-name" }}
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script>
+    const groupName = JSON.parse(document.getElementById("group-name").textContent);
+
+    const chatSocket = new WebSocket(
+      "ws://" + window.location.host + "/ws/chat/" + groupName + "/"
+    );
+
+    chatSocket.onmessage = function (e) {
+      const data = JSON.parse(e.data);
+      document.querySelector("#chat-log").value += data.message + "\n";
+    };
+
+    chatSocket.onclose = function (e) {
+      console.error("Chat socket closed unexpectedly");
+    };
+
+    document.querySelector("#chat-message-input").focus();
+    document.querySelector("#chat-message-input").onkeyup = function (e) {
+      if (e.keyCode === 13) {
+        // enter, return
+        document.querySelector("#chat-message-submit").click();
+      }
+    };
+
+    document.querySelector("#chat-message-submit").onclick = function (e) {
+      const messageInputDom = document.querySelector("#chat-message-input");
+      const message = messageInputDom.value;
+      chatSocket.send(
+        JSON.stringify({
+          message: message
+        })
+      );
+      messageInputDom.value = "";
+    };
+  </script>
+{% endblock %}
